@@ -18,7 +18,8 @@ interface ImageState {
     images: Image[];
     selectedMovie:Image | null;    //  ya bir ımage objesı yada null olabılır dıkatv et hata vermstı
     favorites:Image[];
-    alertModal:alertModal
+    alertModal:alertModal;
+    search: string;
 
 }
 
@@ -27,6 +28,7 @@ const initialState: ImageState = {
     selectedMovie:null ,
     favorites:[],
     alertModal:{message:"", isOpen:false},
+    search:"",
 
 };
 
@@ -57,25 +59,28 @@ else{
         closeAlertModal:(state)=>{
             state.alertModal.isOpen=false;
         },
+        setSearch:(state,action)=>{
+            state.search=action.payload;
+        }
 
     },
 
 });
 
-export const { setImages ,setSelectedMovie , addFavorite, closeAlertModal ,removeFavorite } = imageSlice.actions;
+export const { setImages ,setSelectedMovie , addFavorite, closeAlertModal ,removeFavorite , setSearch} = imageSlice.actions;
 
 export const fetchImages = () => {
     return async (dispatch: AppDispatch) => {
         try {
-            const response = await fetch('https://api.tvmaze.com/schedule?country=US&date=2014-12-01');
+            const response = await fetch('https://api.tvmaze.com/shows');
             const data = await response.json();
             console.log(data);
             dispatch(setImages(data.map((item: any) => ({
                 id: item.id,
-                name: item.show.name,
-                image: item.show.image?.original ?? "",
-                summary:item.show.summary ?? "açıklama yok",
-                airdate:item.airdate ?? "yayın tarih bilinmiyor",
+                name: item.name,
+                image: item.image?.original ?? "/placeholder.jpg",
+                summary:item.summary ?? "açıklama yok",
+                airdate:item.premiered ?? "yayın tarih bilinmiyor",
 
             }))));
         } catch (error) {
