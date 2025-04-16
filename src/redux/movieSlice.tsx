@@ -5,88 +5,101 @@ interface Image {
     id: number;
     name: string;
     image: string;
-    summary:string;
-    airdate:string;
-
-}
-interface alertModal{
-    message:string,
-    isOpen:boolean,
+    summary: string;
+    airdate: string;
+    imdbId: string;
+    genres:string;
 }
 
 interface ImageState {
     images: Image[];
-    selectedMovie:Image | null;    //  ya bir ımage objesı yada null olabılır dıkatv et hata vermstı
-    favorites:Image[];
-    alertModal:alertModal;
+    selectedMovie: Image | null;
+    favorites: Image[];
     search: string;
-
+    currentPage: number;
+    itemsPerPage: number;
+    selectedFilter: string;
+    genres: string[];
 }
 
 const initialState: ImageState = {
     images: [],
-    selectedMovie:null ,
-    favorites:[],
-    alertModal:{message:"", isOpen:false},
-    search:"",
+    selectedMovie:null,
+    favorites: [],
+    search: '',
+    currentPage:1,
+    itemsPerPage:30,
+    selectedFilter:'',
+    genres: [],
 
 };
 
-export const imageSlice = createSlice({
+export const movieSlice = createSlice({
     name: 'image',
     initialState,
     reducers: {
         setImages: (state, action) => {
             state.images = action.payload;
+            },
+        setGenres: (state, action) => {
+            state.genres = action.payload;
         },
         setSelectedMovie: (state, action) => {
             state.selectedMovie = action.payload;
         },
-        addFavorite:(state,action)=>{
-if(!state.favorites.find((movie)=>movie.id===action.payload.id)){
-    state.favorites.push(action.payload);
-    state.alertModal = { message: `${action.payload.name} favorilere eklendi`, isOpen: true };
-}
-else{
-    state.alertModal = { message: `${action.payload.name} önceden favorilere eklenmiş`, isOpen: true };
-}
-},
-        removeFavorite:(state,action)=>{
-            const updateFavorites=state.favorites.filter((movie)=>movie.id !== action.payload.id);
-            state.favorites=updateFavorites;
-            state.alertModal={message: `${action.payload.name} favorilerden çıkarıldı`, isOpen: false };
+        addFavorite: (state, action) => {
+            if (!state.favorites.find((movie) => movie.id === action.payload.id)) {
+                state.favorites.push(action.payload);
+            }
         },
-        closeAlertModal:(state)=>{
-            state.alertModal.isOpen=false;
+        removeFavorite: (state, action) => {
+            state.favorites = state.favorites.filter((movie) => movie.id !== action.payload.id);
         },
-        setSearch:(state,action)=>{
-            state.search=action.payload;
-        }
-
+        setSearch: (state, action) => {
+            state.search = action.payload;
+        },
+        setCurrentPage: (state, action) => {
+            state.currentPage = action.payload;
+        },
+        setSelectedFilter: (state, action) => {
+            state.selectedFilter = action.payload;
+        },
     },
-
 });
 
-export const { setImages ,setSelectedMovie , addFavorite, closeAlertModal ,removeFavorite , setSearch} = imageSlice.actions;
+export const {
+    setImages,
+    setGenres,
+    setSelectedMovie,
+    addFavorite,
+    removeFavorite,
+    setSearch,
+    setCurrentPage,
+    setSelectedFilter
+} = movieSlice.actions;
 
 export const fetchImages = () => {
     return async (dispatch: AppDispatch) => {
         try {
             const response = await fetch('https://api.tvmaze.com/shows');
             const data = await response.json();
-            console.log(data);
-            dispatch(setImages(data.map((item: any) => ({
-                id: item.id,
-                name: item.name,
-                image: item.image?.original ?? "/placeholder.jpg",
-                summary:item.summary ?? "açıklama yok",
-                airdate:item.premiered ?? "yayın tarih bilinmiyor",
-
-            }))));
+            dispatch(setImages(
+                data.map((item: any) => ({
+                    id: item.id,
+                    name: item.name,
+                    image: item.image?.original ?? '/placeholder.jpg',
+                    summary: item.summary ?? 'açıklama yok',
+                    airdate: item.premiered ?? 'yayın tarih bilinmiyor',
+                    imdbId: item.externals?.imdb ?? '',
+                    genres: item.genres.join(', '),
+                }))
+            ));
+            const genres = data.flatMap((item: any) => item.genres);
+            dispatch(setGenres([...new Set(genres)]));
         } catch (error) {
             console.error('Failed to fetch images:', error);
         }
     };
 };
 
-export default imageSlice.reducer;
+export default movieSlice.reducer;

@@ -1,27 +1,40 @@
 import React from "react";
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "../redux/store.tsx";
-import {removeFavorite} from "../redux/imageSlice.tsx";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/store.tsx";
+import { removeFavorite } from "../redux/movieSlice.tsx";
+import { Card, CardHeader, CardBody,Typography } from "@material-tailwind/react";
+import { MdDelete } from "react-icons/md";
+import { useNavigate } from 'react-router-dom';
 
 const Favorites: React.FC = () => {
     const dispatch = useDispatch();
-    const favorites=useSelector((state:RootState)=>state.image.favorites);
+    const favorites = useSelector((state: RootState) => state.image.favorites);
+    const navigate = useNavigate();
 
     return (
         <div>
-            <h1 className="text-center text-black text-4xl underline">FAVORİLER</h1>
-            <div className="grid grid-cols-4 gap-4 ">
-                {favorites.map((movie)=>(
-                    <div className="mb-5">
-                        <img src={movie.image} alt={movie.name}/>
-                        <button className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700
-        hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300
-        dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2" onClick={()=>dispatch(removeFavorite(movie))}>Favorilerden kaldır</button>
-                    </div>
-
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 ">
+                {favorites.map((img) => (
+                    <Card key={img.id} className="flex-row max-w-[20rem]">
+                        <CardHeader shadow={false} floated={false} className="m-0 w-full shrink-0 rounded-r-none relative">
+                            <img src={img.image} alt={img.name} className="h-full w-full object-cover cursor-pointer rounded-3xl" />
+                            <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 text-white flex items-center justify-center text-lg transition-opacity rounded-3xl">
+                    <span className="font-bold text-xl cursor-pointer" onClick={() => navigate("/favorites")}>
+                     <MdDelete
+                         className="h-10 w-10 hover:h-14 w-14 cursor-pointer hover:text-red-700"
+                         onClick={() => dispatch(removeFavorite(img))}>
+                      </MdDelete>
+                    </span>
+                            </div>
+                        </CardHeader>
+                        <CardBody className="p-2">
+                            <Typography className="text-center text-xl font-semibold text-black"></Typography>
+                        </CardBody>
+                    </Card>
                 ))}
             </div>
         </div>
+
     );
 };
 

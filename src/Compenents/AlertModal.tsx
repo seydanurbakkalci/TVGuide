@@ -1,6 +1,6 @@
 import {AppDispatch, RootState} from "../redux/store";
 import {useDispatch, useSelector} from "react-redux";
-import {closeAlertModal} from "../redux/imageSlice";
+import {closeAlertModal} from "../redux/movieSlice.tsx";
 
 
 const AlertModal =()=>{

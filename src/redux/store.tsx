@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
-import imageReducer from '../redux/imageSlice.tsx'
+import imageReducer from './movieSlice.tsx'
 
 export const store = configureStore({
     reducer: {
-       image:imageReducer
+       image:imageReducer,
     },
 })
 
