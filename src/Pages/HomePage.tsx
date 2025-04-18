@@ -2,11 +2,12 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useEffect, useState } from 'react';
 import { RootState, AppDispatch } from '../redux/store';
-import { fetchImages, addFavorite, removeFavorite, setCurrentPage, setSelectedFilter} from '../redux/movieSlice';
+import { fetchImages, setCurrentPage, setSelectedFilter } from '../redux/movieSlice';
 import { Card, CardHeader, CardBody, Typography } from '@material-tailwind/react';
 import { MdFavorite } from 'react-icons/md';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import { FaAnglesLeft, FaAnglesRight } from "react-icons/fa6";
+import { toggleFavorite } from "../utils/toggle.Favorite.tsx";
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
@@ -18,49 +19,59 @@ const HomePage: React.FC = () => {
     const selectedFilter = useSelector((state: RootState) => state.image.selectedFilter);
     const genres = useSelector((state: RootState) => state.image.genres);
     const [filteredImages, setFilteredImages] = useState(images);
+    const[inputFiltre,setInputFiltre]=useState('');
+
 
     useEffect(() => {
         dispatch(fetchImages());
+    }, [dispatch]);
 
-    }, [dispatch ]);
+    useEffect(() => {
+        if (images.length) {
+            setFilteredImages(images);
+        }
+    }, [images]);
 
-   const handleFilterClick=()=>{
-       if(selectedFilter){
-           const filtered =images.filter((img)=>{
-               return img.genres && img.genres.includes(selectedFilter);
-           });
-           setFilteredImages(filtered);
-       }else {
-           setFilteredImages(images);
-       }
-   };
+    const handleFilterClick = () => {
+        const query = inputFiltre.trim();
+        if (!query && !selectedFilter) return;
+
+        fetch(`https://api.tvmaze.com/search/shows?q=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const allShows = data.map(item => item.show);
+
+                const filtered = allShows.filter(show => {
+                    const matchSelect = selectedFilter
+                        ? show.genres.includes(selectedFilter)
+                        : false;
+
+                    const matchInput = inputFiltre
+                        ? show.genres.includes(inputFiltre)
+                        : false;
+
+                    return matchSelect || matchInput;
+                });
+
+                console.log(filtered);
+
+                setFilteredImages(filtered);
+                dispatch(setCurrentPage(1));
+            })
+            .catch(() => {
+                setFilteredImages([]);
+            });
+    };
+
+
+
+
+
+
 
     const indexOfLastImage = currentPage * itemsPerPage;
     const indexOfFirstImage = indexOfLastImage - itemsPerPage;
     const currentImages = filteredImages.slice(indexOfFirstImage, indexOfLastImage);
-
-    const toggleFavorite = (img: any) => {
-        const isFavorited = favorites.some((fav) => fav.id === img.id);
-        if (isFavorited) {
-            dispatch(removeFavorite(img));
-            toast.error(`${img.name} favorilerden çıkarıldı`, {
-                position: "top-right",
-                autoClose: 5000,
-                closeOnClick: true,
-                pauseOnHover: true,
-                progress: undefined,
-            });
-        } else {
-            dispatch(addFavorite(img));
-            toast.success(`${img.name} favorilere eklendi`, {
-                position: "top-right",
-                autoClose: 5000,
-                closeOnClick: true,
-                pauseOnHover: true,
-                progress: undefined,
-            });
-        }
-    };
 
     const handlePageChange = (newPage: number) => {
         const totalPages = Math.ceil(filteredImages.length / itemsPerPage);
@@ -76,6 +87,7 @@ const HomePage: React.FC = () => {
     return (
         <div className="p-4 md:p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                <div >
                 <select
                     value={selectedFilter}
                     onChange={handleFilterChange}
@@ -83,17 +95,26 @@ const HomePage: React.FC = () => {
                 >
                     <option value="">Film türü filtrele...</option>
                     {genres.map((genre) => (
-                        <option key={genre} value={genre.toLowerCase()}>
+                        <option key={genre} value={genre}>
                             {genre}
                         </option>
                     ))}
                 </select>
+                <input className="h-14 w-full md:w-52 border border-gray-300 rounded px-3  "
+                type="search"
+                placeholder="tür giriniz."
+                       value={inputFiltre}
+                       onChange={(e)=>setInputFiltre(e.target.value)}
+                />
+                </div>
                 <button
                     onClick={handleFilterClick}
                     className="w-full md:w-auto px-8 py-3 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700
                                 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg"
-                >Filtrele
+                >
+                    Filtrele
                 </button>
+
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -109,18 +130,18 @@ const HomePage: React.FC = () => {
                                         className="w-full h-full object-cover cursor-pointer rounded-t-xl"
                                     />
                                     <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 text-white flex items-center justify-center text-lg transition-opacity rounded-t-xl">
-                                    <span
-                                        className="font-bold text-xl cursor-pointer"
-                                        onClick={() => navigate(`/details/${img.id}`)}
-                                    >
-                                        Detay İçin Tıkla
-                                    </span>
+                                        <span
+                                            className="font-bold text-xl cursor-pointer"
+                                            onClick={() => navigate(`/details/${img.id}`)}
+                                        >
+                                            Detay İçin Tıkla
+                                        </span>
                                         <span className="absolute top-2 right-2">
-                                        <MdFavorite
-                                            className={`text-3xl hover:text-4xl cursor-pointer transition-all ${isFavorited ? 'text-red-500' : 'text-gray-400'}`}
-                                            onClick={() => toggleFavorite(img)}
-                                        />
-                                    </span>
+                                            <MdFavorite
+                                                className={`text-3xl hover:text-4xl cursor-pointer transition-all ${isFavorited ? 'text-red-500' : 'text-gray-400'}`}
+                                                onClick={() => toggleFavorite( dispatch, favorites,img)}
+                                            />
+                                        </span>
                                     </div>
                                 </CardHeader>
                                 <CardBody className="p-4">
@@ -135,7 +156,7 @@ const HomePage: React.FC = () => {
                     <p className="text-center col-span-full text-gray-500">Sonuç bulunamadı.</p>
                 )}
             </div>
-,
+
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
                 <button
                     onClick={() => handlePageChange(currentPage - 1)}
@@ -156,7 +177,6 @@ const HomePage: React.FC = () => {
             <ToastContainer />
         </div>
     );
-
 };
 
 export default HomePage;

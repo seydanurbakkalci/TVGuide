@@ -54,18 +54,20 @@ const Layout: React.FC = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <button className="flex items-center justify-center px-8 sm:px-16 py-3 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm">
+                    <button className="flex items-center justify-center px-8 sm:px-16 py-3 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700
+                     hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm">
                         Giriş Yap <IoIosLogIn className="text-2xl ml-2" />
                     </button>
 
-                    <button className="flex items-center justify-center px-8 sm:px-16 py-3 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm">
+                    <button className="flex items-center justify-center px-8 sm:px-16 py-3 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700
+                     hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm">
                         Üye Ol <IoPersonCircle className="text-2xl ml-2" />
                     </button>
                 </div>
             </div>
 
             <div className="py-8">
-                <p className="px-6 sm:px-10 text-2xl sm:text-4xl font-bold hover:text-3xl sm:hover:text-5xl transition-all duration-300">
+                <p className="px-6 sm:px-10 text-2xl sm:text-4xl font-bold  transition-all duration-300 cursor-pointer">
                     Gündemdekiler
                 </p>
                 <div className="h-px bg-black mx-6 sm:mx-10"></div>

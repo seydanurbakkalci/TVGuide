@@ -4,6 +4,7 @@ import Favorites from "./Pages/Favorites.tsx";
 import HomePage from "./Pages/HomePage.tsx";
 import Layout from "./Compenents/Layout.tsx";
 import ShowsDetail from "./Pages/ShowsDetail.tsx";
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
     return (

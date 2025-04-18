@@ -9,6 +9,8 @@ interface Image {
     airdate: string;
     imdbId: string;
     genres:string;
+    language:string;
+    ended:string;
 }
 
 interface ImageState {
@@ -20,6 +22,7 @@ interface ImageState {
     itemsPerPage: number;
     selectedFilter: string;
     genres: string[];
+
 }
 
 const initialState: ImageState = {
@@ -92,9 +95,13 @@ export const fetchImages = () => {
                     airdate: item.premiered ?? 'yayın tarih bilinmiyor',
                     imdbId: item.externals?.imdb ?? '',
                     genres: item.genres.join(', '),
+                    language:item.language,
+                    ended:item.ended,
+                    status:item.status,
+                    rating:item.rating ?? 'bilinmiyo',
                 }))
             ));
-            const genres = data.flatMap((item: any) => item.genres);
+            const genres = Array.from(new Set(data.flatMap((item: any) => item.genres)));dispatch(setGenres(genres));
             dispatch(setGenres([...new Set(genres)]));
         } catch (error) {
             console.error('Failed to fetch images:', error);
