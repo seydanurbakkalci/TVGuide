@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { AppDispatch } from './store.tsx';
 
-interface Image {
+ export interface Image {
     id: number;
     name: string;
     image: string;

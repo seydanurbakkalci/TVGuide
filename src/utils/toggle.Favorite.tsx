@@ -3,8 +3,6 @@ import { addFavorite, removeFavorite } from "../redux/movieSlice";
 import { toast } from "react-toastify";
 
 
-
-
 export const toggleFavorite = (dispatch: AppDispatch, favorites: any[], img: any) => {
     const isFavorited = favorites.some((fav) => fav.id === img.id);
 

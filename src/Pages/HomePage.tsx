@@ -1,180 +1,93 @@
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import React, { useEffect, useState } from 'react';
-import { RootState, AppDispatch } from '../redux/store';
-import { fetchImages, setCurrentPage, setSelectedFilter } from '../redux/movieSlice';
-import { Card, CardHeader, CardBody, Typography } from '@material-tailwind/react';
-import { MdFavorite } from 'react-icons/md';
-import { ToastContainer } from 'react-toastify';
-import { FaAnglesLeft, FaAnglesRight } from "react-icons/fa6";
-import { toggleFavorite } from "../utils/toggle.Favorite.tsx";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+import {setImages, setCurrentPage, setSelectedFilter, fetchImages} from "../redux/movieSlice";
+import { toggleFavorite } from "../utils/toggle.Favorite";
+import CardList from "../Compenents/CardList";
 
 const HomePage: React.FC = () => {
-    const navigate = useNavigate();
-    const dispatch = useDispatch<AppDispatch>();
-    const images = useSelector((state: RootState) => state.image.images);
-    const favorites = useSelector((state: RootState) => state.image.favorites);
-    const currentPage = useSelector((state: RootState) => state.image.currentPage);
-    const itemsPerPage = useSelector((state: RootState) => state.image.itemsPerPage);
-    const selectedFilter = useSelector((state: RootState) => state.image.selectedFilter);
-    const genres = useSelector((state: RootState) => state.image.genres);
-    const [filteredImages, setFilteredImages] = useState(images);
-    const[inputFiltre,setInputFiltre]=useState('');
+    const dispatch = useDispatch();
+    const { images, search, currentPage, itemsPerPage, selectedFilter, genres, favorites } = useSelector(
+        (state: RootState) => state.image
+    );
 
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch("https://api.tvmaze.com/shows");
+                const data = await response.json();
+                console.log("Fetched Data: ", data);
+                dispatch(setImages(data));
+            } catch (error) {
+                console.error(" hata:", error);
+            }
+        };
+
+        fetchData();
+    }, [dispatch]);
 
     useEffect(() => {
         dispatch(fetchImages());
     }, [dispatch]);
 
-    useEffect(() => {
-        if (images.length) {
-            setFilteredImages(images);
-        }
-    }, [images]);
 
-    const handleFilterClick = () => {
-        const query = inputFiltre.trim();
-        if (!query && !selectedFilter) return;
-
-        fetch(`https://api.tvmaze.com/search/shows?q=${query}`)
-            .then(response => response.json())
-            .then(data => {
-                const allShows = data.map(item => item.show);
-
-                const filtered = allShows.filter(show => {
-                    const matchSelect = selectedFilter
-                        ? show.genres.includes(selectedFilter)
-                        : false;
-
-                    const matchInput = inputFiltre
-                        ? show.genres.includes(inputFiltre)
-                        : false;
-
-                    return matchSelect || matchInput;
-                });
-
-                console.log(filtered);
-
-                setFilteredImages(filtered);
-                dispatch(setCurrentPage(1));
-            })
-            .catch(() => {
-                setFilteredImages([]);
-            });
-    };
+    const filteredImages = images
+        .filter((movie) => movie.name.toLowerCase().includes(search.toLowerCase()))
+        .filter((movie) => (selectedFilter ? movie.genres.includes(selectedFilter) : true));
 
 
-
-
-
-
-
-    const indexOfLastImage = currentPage * itemsPerPage;
-    const indexOfFirstImage = indexOfLastImage - itemsPerPage;
-    const currentImages = filteredImages.slice(indexOfFirstImage, indexOfLastImage);
-
-    const handlePageChange = (newPage: number) => {
-        const totalPages = Math.ceil(filteredImages.length / itemsPerPage);
-        if (newPage >= 1 && newPage <= totalPages) {
-            dispatch(setCurrentPage(newPage));
-        }
-    };
-
-    const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        dispatch(setSelectedFilter(event.target.value));
-    };
+    const totalPages = Math.ceil(filteredImages.length / itemsPerPage);
+    const paginatedImages = filteredImages.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     return (
-        <div className="p-4 md:p-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                <div >
-                <select
-                    value={selectedFilter}
-                    onChange={handleFilterChange}
-                    className="h-14 w-full md:w-52 border border-gray-300 rounded px-3"
-                >
-                    <option value="">Film türü filtrele...</option>
-                    {genres.map((genre) => (
-                        <option key={genre} value={genre}>
-                            {genre}
-                        </option>
-                    ))}
-                </select>
-                <input className="h-14 w-full md:w-52 border border-gray-300 rounded px-3  "
-                type="search"
-                placeholder="tür giriniz."
-                       value={inputFiltre}
-                       onChange={(e)=>setInputFiltre(e.target.value)}
-                />
-                </div>
+        <div className="p-4">
+            {/* Genre Filter */}
+            <div className="flex flex-wrap gap-2 mb-4">
+                {genres.map((genre) => (
+                    <button
+                        key={genre}
+                        onClick={() => dispatch(setSelectedFilter(genre))}
+                        className={`px-3 py-1 rounded-full text-sm ${
+                            selectedFilter === genre
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-200 text-black font-bold"
+                        }`}
+                    >
+                        {genre}
+                    </button>
+                ))}
                 <button
-                    onClick={handleFilterClick}
-                    className="w-full md:w-auto px-8 py-3 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700
-                                hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg"
+                    onClick={() => dispatch(setSelectedFilter(""))}
+                    className="px-3 py-1 rounded-full bg-red-300 text-black"
                 >
-                    Filtrele
-                </button>
-
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {currentImages.length > 0 ? (
-                    currentImages.map((img) => {
-                        const isFavorited = favorites.some((fav) => fav.id === img.id);
-                        return (
-                            <Card key={img.id} className="flex flex-col w-full">
-                                <CardHeader shadow={false} floated={false} className="relative w-full h-[350px] md:h-[400px]">
-                                    <img
-                                        src={img.image}
-                                        alt={img.name}
-                                        className="w-full h-full object-cover cursor-pointer rounded-t-xl"
-                                    />
-                                    <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 text-white flex items-center justify-center text-lg transition-opacity rounded-t-xl">
-                                        <span
-                                            className="font-bold text-xl cursor-pointer"
-                                            onClick={() => navigate(`/details/${img.id}`)}
-                                        >
-                                            Detay İçin Tıkla
-                                        </span>
-                                        <span className="absolute top-2 right-2">
-                                            <MdFavorite
-                                                className={`text-3xl hover:text-4xl cursor-pointer transition-all ${isFavorited ? 'text-red-500' : 'text-gray-400'}`}
-                                                onClick={() => toggleFavorite( dispatch, favorites,img)}
-                                            />
-                                        </span>
-                                    </div>
-                                </CardHeader>
-                                <CardBody className="p-4">
-                                    <Typography className="font-bold text-center text-xl md:text-2xl text-black">
-                                        {img.name}
-                                    </Typography>
-                                </CardBody>
-                            </Card>
-                        );
-                    })
-                ) : (
-                    <p className="text-center col-span-full text-gray-500">Sonuç bulunamadı.</p>
-                )}
-            </div>
-
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
-                <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
-                >
-                    <FaAnglesLeft />
-                </button>
-                <span className="text-lg font-medium">{currentPage}</span>
-                <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === Math.ceil(filteredImages.length / itemsPerPage)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
-                >
-                    <FaAnglesRight />
+                    Temizle
                 </button>
             </div>
-            <ToastContainer />
+
+            <CardList
+                movies={paginatedImages}
+                favorites={favorites}
+                toggleFavorite={(img) => toggleFavorite(dispatch, favorites, img)}
+            />
+            <div className="flex justify-center mt-6 gap-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+                    <button
+                        key={num}
+                        onClick={() => dispatch(setCurrentPage(num))}
+                        className={`px-3 py-1 rounded-full ${
+                            currentPage === num
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-200 text-gray-800"
+                        }`}
+                    >
+                        {num}
+                    </button>
+                ))}
+            </div>
         </div>
     );
 };
