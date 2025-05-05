@@ -4,13 +4,13 @@ import { Card, CardHeader, CardBody, Typography } from "@material-tailwind/react
 import { MdFavorite } from "react-icons/md";
 import { Image } from "../redux/movieSlice";
 
-type Props = {
+type CardListProps = {
     movies: Image[];
     favorites: Image[];
     toggleFavorite: (img: Image) => void;
 };
 
-const CardList: React.FC<Props> = ({ movies, favorites, toggleFavorite }) => {
+const CardList: React.FC<CardListProps> = ({movies,  favorites, toggleFavorite }) => {
     const navigate = useNavigate();
 
     return (
@@ -19,8 +19,8 @@ const CardList: React.FC<Props> = ({ movies, favorites, toggleFavorite }) => {
                 const isFavorited = favorites.some((fav) => fav.id === movie.id);
 
                 return (
-                    <Card key={movie.id} className="flex flex-col shadow-md rounded-xl">
-                        <CardHeader className="relative h-64 cursor-pointer overflow-hidden rounded-t-xl">
+                    <Card key={movie.id} className="flex flex-col shadow-md rounded-xl ">
+                        <CardHeader className="relative h-64 cursor-pointer overflow-hidden rounded-t-xl ">
                             <img
                                 src={movie.image}
                                 alt={movie.name}
@@ -35,9 +35,7 @@ const CardList: React.FC<Props> = ({ movies, favorites, toggleFavorite }) => {
                                 </span>
                                 <span className="absolute top-2 right-2">
                                     <MdFavorite
-                                        className={`text-3xl hover:text-3xl cursor-pointer transition-all ${
-                                            isFavorited ? "text-red-500" : "text-gray-400"
-                                        }`}
+                                        className={`cursor-pointer ${isFavorited ? "text-red-500" : "text-gray-400"} text-4xl hover:text-5xl`}
                                         onClick={() => toggleFavorite(movie)}
                                     />
                                 </span>

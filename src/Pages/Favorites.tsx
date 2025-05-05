@@ -13,6 +13,8 @@ const Favorites: React.FC = () => {
         dispatch(fetchImages());
     }, [dispatch]);
 
+
+
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Favori Filmler</h1>

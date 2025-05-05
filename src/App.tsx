@@ -6,6 +6,7 @@ import Layout from "./Compenents/Layout.tsx";
 import ShowsDetail from "./Pages/ShowsDetail.tsx";
 import 'react-toastify/dist/ReactToastify.css';
 import {ToastContainer} from "react-toastify";
+import Footer from "./Compenents/Footer.tsx";
 
 function App() {
     return (
@@ -30,6 +31,8 @@ function App() {
             pauseOnHover
             theme="light"
         />
+        <Footer/>
+
 
     </div>
   )

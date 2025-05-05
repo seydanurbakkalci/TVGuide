@@ -1,47 +1,29 @@
-import React, { useEffect, useState } from "react";
-import { MdOutlineDarkMode } from "react-icons/md";
+import React, { useEffect } from "react";
 import { IoHomeOutline, IoSearch } from "react-icons/io5";
 import { MdFavoriteBorder } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import { setSearch } from "../redux/movieSlice";
+import {setSearch, Image, setSearchResults, fetchSearchResults} from "../redux/movieSlice";
 
-type HeaderProps = {
-    title: string;
-};
 
 const Header: React.FC<HeaderProps> = () => {
     const dispatch = useDispatch();
     const search = useSelector((state: RootState) => state.image.search);
-    const [searchResults, setSearchResults] = useState<any[]>([]);
+   const searchResults=useSelector((state:RootState)=>state.image.searchResults);
     const navigate = useNavigate();
+
+
+
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            const query = search.trim();
-            if (query === "") {
-                setSearchResults([]);
-            } else {
-                fetch(`https://api.tvmaze.com/search/shows?q=${query}`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        const results = data.map((item: any) => ({
-                            id: item.show.id,
-                            name: item.show.name,
-                            image: item.show.image?.medium ?? "/images/placeholder.png"
-                        }));
-                        setSearchResults(results.slice(0, 10));
-                    })
-                    .catch((error) => {
-                        console.error("API error:", error);
-                        setSearchResults([]);
-                    });
-            }
+        dispatch(fetchSearchResults(search));
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [search]);
+    }, [search,dispatch]);
+
 
     return (
         <header className="bg-blue-950 text-white px-4 py-2 flex flex-wrap lg:flex-nowrap items-center justify-between relative gap-2">
@@ -77,9 +59,8 @@ const Header: React.FC<HeaderProps> = () => {
                             <div
                                 key={movie.id}
                                 className="flex items-center gap-4 p-2 hover:bg-blue-100 cursor-pointer"
-                                onClick={() =>{
-                                    navigate(`/details/${movie.id}`)
-                                    dispatch(setSearch(""));
+                                onClick={() => {dispatch(setSearch(""));
+                                    navigate(`/detail/${movie.id}`);
                                 }}
 
                             >
@@ -100,7 +81,7 @@ const Header: React.FC<HeaderProps> = () => {
                     className=" hover:text-blue-300 cursor-pointer"
                     onClick={() => navigate("/homepage")}
                 />
-                <MdOutlineDarkMode className=" hover:text-blue-300 cursor-pointer" />
+
                 <div
                     className="flex items-center gap-1 hover:text-blue-300 cursor-pointer"
                     onClick={() => navigate("/favorites")}

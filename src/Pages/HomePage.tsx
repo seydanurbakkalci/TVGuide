@@ -5,23 +5,23 @@ import {setImages, setCurrentPage, setSelectedFilter, fetchImages} from "../redu
 import { toggleFavorite } from "../utils/toggle.Favorite";
 import CardList from "../Compenents/CardList";
 
+
 const HomePage: React.FC = () => {
     const dispatch = useDispatch();
     const { images, search, currentPage, itemsPerPage, selectedFilter, genres, favorites } = useSelector(
         (state: RootState) => state.image
     );
 
-
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await fetch("https://api.tvmaze.com/shows");
                 const data = await response.json();
-                console.log("Fetched Data: ", data);
                 dispatch(setImages(data));
             } catch (error) {
                 console.error(" hata:", error);
             }
+
         };
 
         fetchData();
@@ -30,6 +30,13 @@ const HomePage: React.FC = () => {
     useEffect(() => {
         dispatch(fetchImages());
     }, [dispatch]);
+
+    useEffect(() => {
+        const savedFilter=localStorage.getItem('selectedFilter');
+        if(savedFilter){
+            dispatch(setSelectedFilter(savedFilter));
+        }
+    }, []);
 
 
     const filteredImages = images
@@ -45,7 +52,6 @@ const HomePage: React.FC = () => {
 
     return (
         <div className="p-4">
-            {/* Genre Filter */}
             <div className="flex flex-wrap gap-2 mb-4">
                 {genres.map((genre) => (
                     <button
