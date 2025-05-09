@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody, Typography } from "@material-tailwind/react";
 import { MdFavorite } from "react-icons/md";
-import { Image } from "../redux/movieSlice";
+import { Image } from "../Redux/movieSlice";
 
 type CardListProps = {
     movies: Image[];
@@ -31,7 +31,7 @@ const CardList: React.FC<CardListProps> = ({movies,  favorites, toggleFavorite }
                                     className="font-bold text-xl cursor-pointer"
                                     onClick={() => navigate(`/detail/${movie.id}`)}
                                 >
-                                    detay için tıkla
+                                    Click for details
                                 </span>
                                 <span className="absolute top-2 right-2">
                                     <MdFavorite

@@ -8,9 +8,12 @@ export interface Image {
     summary: string;
     airdate: string;
     imdbId: string;
-    genres:string;
-    language:string;
-    ended:string;
+    genres: string[];
+    language: string;
+    ended: string;
+    rating: { average: number | null };
+    schedule: { time: string; days: string[] };
+    status: string;
 }
 
 interface ImageState {
@@ -24,6 +27,8 @@ interface ImageState {
     genres: string[];
     selectedImage:Image|null;
     searchResults:Image[];
+    searchDropdown:boolean;
+
 
 }
 
@@ -42,19 +47,23 @@ const initialState: ImageState = {
     images: [],
     selectedMovie:null,
     favorites: getFavoritesFromLocalStorage(),
-    search: '',
     currentPage: getCurrentPageFromLocalStorage(),
     itemsPerPage:30,
     selectedFilter:'',
     genres: [],
     selectedImage:null,
     searchResults:[],
+    searchDropdown:false,
+    scrollPosition: 0,
+    visibleImages: [],
+    loading:false,
 
 };
 
 export const movieSlice = createSlice({
     name: 'image',
     initialState,
+
     reducers: {
         setImages: (state, action) => {
             state.images = action.payload;
@@ -78,9 +87,6 @@ export const movieSlice = createSlice({
             state.favorites = state.favorites.filter((movie) => movie.id !== action.payload.id);
             localStorage.setItem('favorites', JSON.stringify(state.favorites));
         },
-        setSearch: (state, action) => {
-            state.search = action.payload;
-        },
         setCurrentPage: (state, action) => {
             state.currentPage = action.payload;
             localStorage.setItem('currentPage',action.payload.toString());
@@ -93,6 +99,21 @@ export const movieSlice = createSlice({
         setSearchResults:(state,action)=>{
             state.searchResults=action.payload;
         },
+        setDropdown:(state,action)=>{
+            state.searchDropdown = action.payload;
+        },
+
+        closeSearchDropdown:(state)=>{
+            state.searchDropdown=false;
+        },
+        setScrollPosition: (state, action) => {
+            state.scrollPosition = action.payload;
+            state.visibleImages = state.images.slice(action.payload, action.payload + 6);
+        },
+        setVisibleImages: (state) => {
+            state.visibleImages = state.images.slice(state.scrollPosition, state.scrollPosition + 6);
+        },
+
     },
 });
 
@@ -103,10 +124,13 @@ export const {
     setSelectedImage,
     addFavorite,
     removeFavorite,
-    setSearch,
     setCurrentPage,
     setSelectedFilter,
     setSearchResults,
+    setDropdown,
+    closeSearchDropdown,
+    setScrollPosition,
+    setVisibleImages,
 } = movieSlice.actions;
 
 export const fetchSearchResults = (query:string) => {
@@ -152,11 +176,15 @@ export const fetchImages = () => {
                     summary: item.summary ?? 'açıklama yok',
                     airdate: item.premiered ?? 'yayın tarih bilinmiyor',
                     imdbId: item.externals?.imdb ?? '',
-                    genres: item.genres.join(', '),
-                    language:item.language,
-                    ended:item.ended,
-                    status:item.status,
-                    rating:item.rating ?? 'bilinmiyo',
+                    genres: item.genres ?? [],
+                    language: item.language,
+                    ended: item.ended ?? 'bilinmiyor',
+                    status: item.status,
+                    rating: {average: item.rating?.average ?? null},
+                    schedule: {
+                        time: item.schedule?.time ?? 'bilinmiyor',
+                        days: item.schedule?.days ?? [],
+                    },
                 }))
             ));
             const genres = Array.from(new Set(data.flatMap((item: any) => item.genres)));dispatch(setGenres(genres));

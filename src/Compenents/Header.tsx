@@ -1,94 +1,38 @@
-import React, { useEffect } from "react";
-import { IoHomeOutline, IoSearch } from "react-icons/io5";
+import { IoHomeOutline } from "react-icons/io5";
 import { MdFavoriteBorder } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../redux/store";
-import {setSearch, Image, setSearchResults, fetchSearchResults} from "../redux/movieSlice";
+import { Link } from "react-router-dom";
+import Search from "./Search.tsx";
 
-
-const Header: React.FC<HeaderProps> = () => {
-    const dispatch = useDispatch();
-    const search = useSelector((state: RootState) => state.image.search);
-   const searchResults=useSelector((state:RootState)=>state.image.searchResults);
-    const navigate = useNavigate();
-
-
-
-
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-        dispatch(fetchSearchResults(search));
-        }, 300);
-
-        return () => clearTimeout(timeoutId);
-    }, [search,dispatch]);
-
-
+const Header: React.FC = () => {
     return (
         <header className="bg-blue-950 text-white px-4 py-2 flex flex-wrap lg:flex-nowrap items-center justify-between relative gap-2">
             <div className="flex items-center gap-4 flex-wrap relative w-full lg:w-auto">
-                <h1
+                <Link
+                    to="/"
                     className="text-xl font-bold  hover:text-blue-300 cursor-pointer"
-                    onClick={() => navigate("/")}
                 >
                     <img src="/images/img4.png" className="h-13 w-20" />
-                </h1>
-
-                <div className="flex items-center w-full lg:w-auto gap-2">
-                    <input
-                        type="search"
-                        placeholder="Search for..."
-                        value={search}
-                        onChange={(e) => dispatch(setSearch(e.target.value))}
-                        className="text-base text-black h-10 w-full lg:w-80 px-4 rounded-md"
-                    />
-
-                    <button
-                        className="p-2 text-white bg-gradient-to-r from-blue-500 via-blue-600
-                            to-blue-700 hover:bg-gradient-to-br dark:focus:ring-blue-800 font-medium
-                            rounded-lg text-sm text-center"
-                    >
-                        <IoSearch className="text-xl " />
-                    </button>
-                </div>
-
-                {searchResults.length > 0 && (
-                    <div className="absolute top-full mt-2 bg-white text-black rounded-lg shadow-lg w-full lg:w-96 z-50">
-                        {searchResults.map((movie) => (
-                            <div
-                                key={movie.id}
-                                className="flex items-center gap-4 p-2 hover:bg-blue-100 cursor-pointer"
-                                onClick={() => {dispatch(setSearch(""));
-                                    navigate(`/detail/${movie.id}`);
-                                }}
-
-                            >
-                                <img
-                                    src={movie.image}
-                                    alt={movie.name}
-                                    className="w-12 h-16 object-cover rounded"
-                                />
-                                <p className="text-sm">{movie.name}</p>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                </Link>
+                <Search/>
             </div>
 
-            <div className="flex justify-center lg:justify-end items-center gap-4 w-full lg:w-auto text-2xl mt-2 lg:mt-0">
-                <IoHomeOutline
-                    className=" hover:text-blue-300 cursor-pointer"
-                    onClick={() => navigate("/homepage")}
-                />
 
-                <div
+            <div className="flex justify-center lg:justify-end items-center gap-4 w-full lg:w-auto text-2xl mt-2 lg:mt-0">
+                <Link
+                    to="/homepage"
                     className="flex items-center gap-1 hover:text-blue-300 cursor-pointer"
-                    onClick={() => navigate("/favorites")}
+                >
+                    <IoHomeOutline />
+                    <p className="text-base lg:text-xl">HomePage</p>
+                </Link>
+
+                <Link
+                    to="/favorites"
+                    className="flex items-center gap-1 hover:text-blue-300 cursor-pointer"
                 >
                     <MdFavoriteBorder />
-                    <p className="text-base lg:text-xl">favorilerim</p>
-                </div>
+                    <p className="text-base lg:text-xl">Favorites</p>
+                </Link>
             </div>
         </header>
     );

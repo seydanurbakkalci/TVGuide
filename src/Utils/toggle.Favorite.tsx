@@ -1,5 +1,5 @@
-import { AppDispatch } from "../redux/store";
-import { addFavorite, removeFavorite } from "../redux/movieSlice";
+import { AppDispatch } from "../Redux/store";
+import { addFavorite, removeFavorite } from "../Redux/movieSlice";
 import { toast } from "react-toastify";
 
 

@@ -1,19 +1,21 @@
  import React, { useEffect } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../redux/store.tsx";
-import {fetchImages, setSelectedImage} from "../redux/movieSlice";
+import { AppDispatch, RootState } from "../Redux/store.tsx";
+import {fetchImages, setSelectedImage} from "../Redux/movieSlice";
 import { MdFavorite } from "react-icons/md";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { toggleFavorite } from "../utils/toggle.Favorite.tsx";
+import { toggleFavorite } from "../Utils/toggle.Favorite.tsx";
 
 const ShowsDetail: React.FC = () => {
     const { id } = useParams();
     const dispatch = useDispatch<AppDispatch>();
-    const selectedImage=useSelector((state:RootState)=>state.image.selectedImage)
-    const images = useSelector((state: RootState) => state.image.images);
-    const favorites = useSelector((state: RootState) => state.image.favorites);
+    const { images, favorites , selectedImage } = useSelector(
+        (state: RootState) => state.image
+    );
+
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -25,8 +27,9 @@ const ShowsDetail: React.FC = () => {
         dispatch(setSelectedImage(img));
     }, [id, images,dispatch]);
 
-    console.log("selecetedıamge" , selectedImage)
+    console.log("selecetedIamge" , selectedImage)
 
+    // @ts-ignore
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4 py-10">
             {selectedImage ? (

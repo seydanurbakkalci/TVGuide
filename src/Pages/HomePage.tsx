@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../redux/store";
-import {setImages, setCurrentPage, setSelectedFilter, fetchImages} from "../redux/movieSlice";
-import { toggleFavorite } from "../utils/toggle.Favorite";
+import { RootState } from "../Redux/store";
+import {setImages, setCurrentPage, setSelectedFilter, fetchImages} from "../Redux/movieSlice";
+import { toggleFavorite } from "../Utils/toggle.Favorite";
 import CardList from "../Compenents/CardList";
 
 
 const HomePage: React.FC = () => {
     const dispatch = useDispatch();
-    const { images, search, currentPage, itemsPerPage, selectedFilter, genres, favorites } = useSelector(
+    const { images, currentPage, itemsPerPage, selectedFilter, genres, favorites } = useSelector(
         (state: RootState) => state.image
     );
 
@@ -29,19 +29,16 @@ const HomePage: React.FC = () => {
 
     useEffect(() => {
         dispatch(fetchImages());
-    }, [dispatch]);
-
+    }, []);
     useEffect(() => {
         const savedFilter=localStorage.getItem('selectedFilter');
         if(savedFilter){
             dispatch(setSelectedFilter(savedFilter));
         }
     }, []);
-
-
     const filteredImages = images
-        .filter((movie) => movie.name.toLowerCase().includes(search.toLowerCase()))
         .filter((movie) => (selectedFilter ? movie.genres.includes(selectedFilter) : true));
+
 
 
     const totalPages = Math.ceil(filteredImages.length / itemsPerPage);
