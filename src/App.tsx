@@ -11,7 +11,7 @@ import Footer from "./Compenents/Footer.tsx";
 function App() {
     return (
     <div  >
-        <Header title={"TV GUİDE"}/>
+        <Header />
 
         <Routes>
             <Route path="/" element={<Layout />} />

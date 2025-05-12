@@ -28,21 +28,20 @@ interface ImageState {
     selectedImage:Image|null;
     searchResults:Image[];
     searchDropdown:boolean;
-
-
+    scrollPosition: number;
+    visibleImages: Image[];
+    loading: boolean;
+    showDetail: Image | null;
 }
-
 
 const getCurrentPageFromLocalStorage = () => {
     const currentPage = localStorage.getItem('currentPage');
     return currentPage ? parseInt(currentPage, 10) : 1;
 };
 
-
 const getFavoritesFromLocalStorage = () => {
     return JSON.parse(localStorage.getItem('favorites') || '[]');
 };
-
 const initialState: ImageState = {
     images: [],
     selectedMovie:null,
@@ -57,7 +56,8 @@ const initialState: ImageState = {
     scrollPosition: 0,
     visibleImages: [],
     loading:false,
-
+    showDetail: null,
+    search:"",
 };
 
 export const movieSlice = createSlice({
@@ -70,12 +70,6 @@ export const movieSlice = createSlice({
         },
         setGenres: (state, action) => {
             state.genres = action.payload;
-        },
-        setSelectedMovie: (state, action) => {
-            state.selectedMovie = action.payload;
-        },
-        setSelectedImage: (state, action) => {
-            state.selectedImage = action.payload;
         },
         addFavorite: (state, action) => {
             if (!state.favorites.find((movie) => movie.id === action.payload.id)) {
@@ -94,7 +88,7 @@ export const movieSlice = createSlice({
         },
         setSelectedFilter: (state, action) => {
             state.selectedFilter = action.payload;
-       localStorage.setItem('selectedFilter',action.payload);
+            localStorage.setItem('selectedFilter',action.payload);
         },
         setSearchResults:(state,action)=>{
             state.searchResults=action.payload;
@@ -113,15 +107,15 @@ export const movieSlice = createSlice({
         setVisibleImages: (state) => {
             state.visibleImages = state.images.slice(state.scrollPosition, state.scrollPosition + 6);
         },
-
+        setShowDetail: (state, action) => {
+            state.showDetail = action.payload;
+        },
     },
 });
 
 export const {
     setImages,
     setGenres,
-    setSelectedMovie,
-    setSelectedImage,
     addFavorite,
     removeFavorite,
     setCurrentPage,
@@ -129,8 +123,9 @@ export const {
     setSearchResults,
     setDropdown,
     closeSearchDropdown,
+    setShowDetail,
     setScrollPosition,
-    setVisibleImages,
+    setVisibleImages
 } = movieSlice.actions;
 
 export const fetchSearchResults = (query:string) => {
@@ -151,7 +146,7 @@ export const fetchSearchResults = (query:string) => {
                 summary: item.show.summary ?? 'açıklama yok',
                 airdate: item.show.premiered ?? 'yayın tarih bilinmiyor',
                 imdbId: item.show.externals?.imdb ?? '',
-                genres: item.show.genres.join(', '),
+                genres: item.show.genres ?? [],
                 language: item.show.language,
                 ended: item.show.ended,
             }));
@@ -160,8 +155,38 @@ export const fetchSearchResults = (query:string) => {
             console.error("apı error", error);
             dispatch(setSearchResults([]));
         }
-        };
     };
+};
+
+export const getShowDetail = (id: number) => {
+    return async (dispatch: AppDispatch) => {
+        try {
+            const response = await fetch(`https://api.tvmaze.com/shows/${id}`);
+            const data = await response.json();
+            dispatch(setShowDetail({
+                id: data.id,
+                name: data.name,
+                image: data.image?.original ?? '/placeholder.jpg',
+                summary: data.summary ?? 'açıklama yok',
+                airdate: data.premiered ?? 'yayın tarih bilinmiyor',
+                imdbId: data.externals?.imdb ?? '',
+                genres: data.genres ?? [],
+                language: data.language,
+                ended: data.ended ?? 'bilinmiyor',
+                status: data.status,
+                rating: {average: data.rating?.average ?? null},
+                schedule: {
+                    time: data.schedule?.time ?? 'bilinmiyor',
+                    days: data.schedule?.days ?? [],
+                },
+            }));
+            const genres = Array.from(new Set(data.flatMap((item: any) => item.genres)));dispatch(setGenres(genres));
+            dispatch(setGenres([...new Set(genres)]));
+        } catch (error) {
+            console.error('Failed to fetch images:', error);
+        }
+    };
+}
 
 export const fetchImages = () => {
     return async (dispatch: AppDispatch) => {

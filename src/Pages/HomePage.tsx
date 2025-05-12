@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../Redux/store";
-import {setImages, setCurrentPage, setSelectedFilter, fetchImages} from "../Redux/movieSlice";
+import { RootState } from "../redux/store";
+import {setImages, setCurrentPage, setSelectedFilter, fetchImages} from "../redux/movieSlice";
 import { toggleFavorite } from "../Utils/toggle.Favorite";
-import CardList from "../Compenents/CardList";
+import CardList from "../Compenents/CardList.tsx";
 
 
 const HomePage: React.FC = () => {
@@ -28,6 +28,7 @@ const HomePage: React.FC = () => {
     }, [dispatch]);
 
     useEffect(() => {
+        // @ts-ignore
         dispatch(fetchImages());
     }, []);
     useEffect(() => {

@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody, Typography } from "@material-tailwind/react";
 import { MdFavorite } from "react-icons/md";
-import { Image } from "../Redux/movieSlice";
+import { Image } from "../redux/movieSlice.tsx";
 
 type CardListProps = {
     movies: Image[];
@@ -19,8 +19,10 @@ const CardList: React.FC<CardListProps> = ({movies,  favorites, toggleFavorite }
                 const isFavorited = favorites.some((fav) => fav.id === movie.id);
 
                 return (
-                    <Card key={movie.id} className="flex flex-col shadow-md rounded-xl ">
-                        <CardHeader className="relative h-64 cursor-pointer overflow-hidden rounded-t-xl ">
+                    <Card key={movie.id} className="flex flex-col shadow-md rounded-xl"
+                          {...({} as React.ComponentProps<typeof Card>)}>
+                        <CardHeader className="relative h-64 cursor-pointer overflow-hidden rounded-t-xl"
+                                    {...({} as React.ComponentProps<typeof CardHeader>)}>
                             <img
                                 src={movie.image}
                                 alt={movie.name}
@@ -41,8 +43,9 @@ const CardList: React.FC<CardListProps> = ({movies,  favorites, toggleFavorite }
                                 </span>
                             </div>
                         </CardHeader>
-                        <CardBody className="text-center p-2">
-                            <Typography variant="h6" className="font-semibold">
+                        <CardBody className="text-center p-2"  {...({} as React.ComponentProps<typeof CardBody>)}>
+                            <Typography variant="h6" className="font-semibold"
+                                        {...({} as React.ComponentProps<typeof Typography>)}>
                                 {movie.name}
                             </Typography>
                         </CardBody>

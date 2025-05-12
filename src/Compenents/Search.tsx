@@ -1,26 +1,24 @@
-import React, { useCallback, useEffect ,useRef } from "react";
+import React, { useEffect ,useRef } from "react";
 import { IoSearch } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { fetchSearchResults, setDropdown, closeSearchDropdown } from "../redux/movieSlice";
 import debounce from 'lodash/debounce';
+import type { AppDispatch } from '../redux/store';
 
 const Search: React.FC = () => {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const searchResults = useSelector((state: RootState) => state.image.searchResults);
     const searchDropdown = useSelector((state: RootState) => state.image.searchDropdown);
 
     // Refs to track if the click is inside or outside the dropdown
-    const searchRef = useRef(null);
+    const searchRef = useRef<HTMLDivElement | null>(null); //hata
 
-    const debouncedSearch = useCallback(
-        debounce((query: string) => {
-            dispatch(fetchSearchResults(query));
-        }, 300),
-        [dispatch]
-    );
+    const debouncedSearch = debounce((query: string) => {
+        dispatch(fetchSearchResults(query));
+    }, 300)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
@@ -32,10 +30,11 @@ const Search: React.FC = () => {
         }
     };
 
-    // Handle click outside logic using ref
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (searchRef.current && !searchRef.current.contains(event.target) && searchDropdown) {
+            if (searchRef.current?.contains(event.target as Node)) { //hata
+                dispatch(setDropdown(true));
+            } else if (searchDropdown) {
                 dispatch(closeSearchDropdown());
             }
         };
@@ -45,7 +44,6 @@ const Search: React.FC = () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [dispatch, searchDropdown]);
-
 
     return (
         <div ref={searchRef} className="relative w-full lg:w-80 search-container">

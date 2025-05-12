@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../Redux/store";
-import CardList from "../Compenents/CardList";
-import { fetchImages } from "../Redux/movieSlice.tsx";
+import { RootState } from "../redux/store";
+import CardList from "../Compenents/CardList.tsx";
+import { fetchImages } from "../redux/movieSlice.tsx";
 import { toggleFavorite } from "../Utils/toggle.Favorite";
 
 const Favorites: React.FC = () => {
@@ -10,6 +10,7 @@ const Favorites: React.FC = () => {
     const { favorites } = useSelector((state: RootState) => state.image);
 
     useEffect(() => {
+        // @ts-ignore
         dispatch(fetchImages());
     }, [dispatch]);
 
