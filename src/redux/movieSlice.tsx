@@ -4,7 +4,7 @@ import { AppDispatch } from './store.tsx';
 export interface Image {
     id: number;
     name: string;
-    image: string;
+    image: {medium:string; original:string};
     summary: string;
     airdate: string;
     imdbId: string;
@@ -17,19 +17,14 @@ export interface Image {
 }
 
 interface ImageState {
-    images: Image[];
-    selectedMovie: Image | null;
+    movies: Image[];
     favorites: Image[];
     search: string;
+    searchResults:Image[];
     currentPage: number;
     itemsPerPage: number;
     selectedFilter: string;
-    genres: string[];
-    selectedImage:Image|null;
-    searchResults:Image[];
     searchDropdown:boolean;
-    scrollPosition: number;
-    visibleImages: Image[];
     loading: boolean;
     showDetail: Image | null;
 }
@@ -43,18 +38,13 @@ const getFavoritesFromLocalStorage = () => {
     return JSON.parse(localStorage.getItem('favorites') || '[]');
 };
 const initialState: ImageState = {
-    images: [],
-    selectedMovie:null,
+    movies: [],
     favorites: getFavoritesFromLocalStorage(),
     currentPage: getCurrentPageFromLocalStorage(),
     itemsPerPage:30,
     selectedFilter:'',
-    genres: [],
-    selectedImage:null,
     searchResults:[],
     searchDropdown:false,
-    scrollPosition: 0,
-    visibleImages: [],
     loading:false,
     showDetail: null,
     search:"",
@@ -65,12 +55,10 @@ export const movieSlice = createSlice({
     initialState,
 
     reducers: {
-        setImages: (state, action) => {
-            state.images = action.payload;
+        setMovies: (state, action) => {
+            state.movies = action.payload;
         },
-        setGenres: (state, action) => {
-            state.genres = action.payload;
-        },
+
         addFavorite: (state, action) => {
             if (!state.favorites.find((movie) => movie.id === action.payload.id)) {
                 state.favorites.push(action.payload);
@@ -100,13 +88,6 @@ export const movieSlice = createSlice({
         closeSearchDropdown:(state)=>{
             state.searchDropdown=false;
         },
-        setScrollPosition: (state, action) => {
-            state.scrollPosition = action.payload;
-            state.visibleImages = state.images.slice(action.payload, action.payload + 6);
-        },
-        setVisibleImages: (state) => {
-            state.visibleImages = state.images.slice(state.scrollPosition, state.scrollPosition + 6);
-        },
         setShowDetail: (state, action) => {
             state.showDetail = action.payload;
         },
@@ -114,8 +95,7 @@ export const movieSlice = createSlice({
 });
 
 export const {
-    setImages,
-    setGenres,
+    setMovies,
     addFavorite,
     removeFavorite,
     setCurrentPage,
@@ -124,8 +104,6 @@ export const {
     setDropdown,
     closeSearchDropdown,
     setShowDetail,
-    setScrollPosition,
-    setVisibleImages
 } = movieSlice.actions;
 
 export const fetchSearchResults = (query:string) => {
@@ -139,16 +117,10 @@ export const fetchSearchResults = (query:string) => {
             const response = await fetch(`https://api.tvmaze.com/search/shows?q=${query}`);
 
             const data = await response.json();
-            const results = data.map((item: any) => ({
-                id: item.show.id,
-                name: item.show.name,
-                image: item.show.image?.original ?? '/placeholder.jpg',
-                summary: item.show.summary ?? 'açıklama yok',
-                airdate: item.show.premiered ?? 'yayın tarih bilinmiyor',
-                imdbId: item.show.externals?.imdb ?? '',
-                genres: item.show.genres ?? [],
-                language: item.show.language,
-                ended: item.show.ended,
+            const results = data.map((item: Image) => ({
+                name: item.name,
+                image: item.image?.original ?? '/placeholder.jpg',
+
             }));
             dispatch(setSearchResults(results.slice(0, 10)));
         } catch (error) {
@@ -180,8 +152,7 @@ export const getShowDetail = (id: number) => {
                     days: data.schedule?.days ?? [],
                 },
             }));
-            const genres = Array.from(new Set(data.flatMap((item: any) => item.genres)));dispatch(setGenres(genres));
-            dispatch(setGenres([...new Set(genres)]));
+
         } catch (error) {
             console.error('Failed to fetch images:', error);
         }
@@ -193,14 +164,14 @@ export const fetchImages = () => {
         try {
             const response = await fetch('https://api.tvmaze.com/shows');
             const data = await response.json();
-            dispatch(setImages(
-                data.map((item: any) => ({
+            dispatch(setMovies(
+                data.map((item: Image) => ({
                     id: item.id,
                     name: item.name,
-                    image: item.image?.original ?? '/placeholder.jpg',
+                    image:item.image?.original ?? '/placeholder.jpg',
                     summary: item.summary ?? 'açıklama yok',
-                    airdate: item.premiered ?? 'yayın tarih bilinmiyor',
-                    imdbId: item.externals?.imdb ?? '',
+                    airdate: item.airdate,
+                    imdbId: item.imdbId,
                     genres: item.genres ?? [],
                     language: item.language,
                     ended: item.ended ?? 'bilinmiyor',
@@ -212,12 +183,9 @@ export const fetchImages = () => {
                     },
                 }))
             ));
-            const genres = Array.from(new Set(data.flatMap((item: any) => item.genres)));dispatch(setGenres(genres));
-            dispatch(setGenres([...new Set(genres)]));
         } catch (error) {
             console.error('Failed to fetch images:', error);
         }
     };
 };
-
 export default movieSlice.reducer;

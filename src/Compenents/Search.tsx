@@ -67,7 +67,7 @@ const Search: React.FC = () => {
                             }}
                         >
                             <img
-                                src={movie.image}
+                                src={movie.image.original}
                                 alt={movie.name}
                                 className="w-12 h-16 object-cover rounded"
                             />

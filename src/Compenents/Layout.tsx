@@ -5,35 +5,21 @@ import {IoPersonCircle} from "react-icons/io5";
 import {fetchImages} from "../redux/movieSlice.tsx";
 import {RootState, AppDispatch} from "../redux/store";
 import {useNavigate} from "react-router-dom";
-import {FaAngleDoubleLeft, FaAngleDoubleRight} from "react-icons/fa";
 import {motion} from "motion/react";
 
 const Layout: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const images = useSelector((state: RootState) => state.image.images);
-    const scrollPosition = useSelector((state: RootState) => state.image.scrollPosition);
-    const visibleImages = useSelector((state: RootState) => state.image.visibleImages);
+    const images = useSelector((state: RootState) => state.image.movies);
     const navigate = useNavigate();
 
     useEffect(() => {
         if (images.length === 0) {
             dispatch(fetchImages());
         } else {
-            dispatch({type: "image/setVisibleImages"});
+            dispatch({type: "image/Images"});
         }
     }, [dispatch, images]);
 
-    const handleScrollLeft = () => {
-        if (scrollPosition > 0) {
-            dispatch({type: "image/setScrollPosition", payload: scrollPosition - 1});
-        }
-    };
-
-    const handleScrollRight = () => {
-        if (scrollPosition < images.length - 6) {
-            dispatch({type: "image/setScrollPosition", payload: scrollPosition + 1});
-        }
-    };
 
     return (
         <div className="relative ">
@@ -75,17 +61,11 @@ const Layout: React.FC = () => {
                         Trending Now
                     </p>
                     <div className="relative">
-                        <button
-                            onClick={handleScrollLeft}
-                            className="absolute left-2 sm:left-24 top-1/2 transform -translate-y-1/2 bg-gray-600 text-white rounded-full p-2 sm:p-3 z-10"
-                            disabled={scrollPosition === 0}
-                        >
-                            <FaAngleDoubleLeft/>
-                        </button>
+
                         <div className="flex space-x-4 py-16 px-4 sm:px-36 overflow-hidden">
 
-                            {visibleImages.length > 0 ? (
-                                visibleImages.map((img: any) => (
+                            {images.length > 0 ? (
+                                images.map((img: any) => (
                                     <div
                                         key={img.id}
                                         className="bg-white rounded-2xl shadow-md overflow-hidden transition transform hover:scale-105 w-[60vw] sm:w-64 flex-shrink-0"
@@ -114,14 +94,6 @@ const Layout: React.FC = () => {
                                 </p>
                             )}
                         </div>
-
-                        <button
-                            onClick={handleScrollRight}
-                            className="absolute right-2 sm:right-20 top-1/2 transform -translate-y-1/2 bg-gray-600 text-white rounded-full p-2 sm:p-3 z-10"
-
-                        >
-                            <FaAngleDoubleRight/>
-                        </button>
                     </div>
                 </div>
             </motion.div>

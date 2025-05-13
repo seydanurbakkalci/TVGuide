@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import CardList from "../Compenents/CardList.tsx";
-import { fetchImages } from "../redux/movieSlice.tsx";
+import {fetchImages} from "../redux/movieSlice.tsx";
 import { toggleFavorite } from "../Utils/toggle.Favorite";
 
 const Favorites: React.FC = () => {

@@ -1,47 +1,36 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../redux/store";
-import {setImages, setCurrentPage, setSelectedFilter, fetchImages} from "../redux/movieSlice";
-import { toggleFavorite } from "../Utils/toggle.Favorite";
+import React, {useEffect} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {AppDispatch, RootState} from "../redux/store";
+import {setCurrentPage, setSelectedFilter, fetchImages} from "../redux/movieSlice";
+import {toggleFavorite} from "../Utils/toggle.Favorite";
 import CardList from "../Compenents/CardList.tsx";
 
 
 const HomePage: React.FC = () => {
-    const dispatch = useDispatch();
-    const { images, currentPage, itemsPerPage, selectedFilter, genres, favorites } = useSelector(
+    const dispatch = useDispatch<AppDispatch>();
+    const {movies, currentPage, itemsPerPage, selectedFilter, favorites} = useSelector(
         (state: RootState) => state.image
     );
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch("https://api.tvmaze.com/shows");
-                const data = await response.json();
-                dispatch(setImages(data));
-            } catch (error) {
-                console.error(" hata:", error);
-            }
-
-        };
-
-        fetchData();
-    }, [dispatch]);
-
-    useEffect(() => {
-        // @ts-ignore
         dispatch(fetchImages());
     }, []);
+
     useEffect(() => {
-        const savedFilter=localStorage.getItem('selectedFilter');
-        if(savedFilter){
+        const savedFilter = localStorage.getItem('selectedFilter');
+        if (savedFilter) {
             dispatch(setSelectedFilter(savedFilter));
         }
     }, []);
-    const filteredImages = images
+
+    const filteredImages = movies
         .filter((movie) => (selectedFilter ? movie.genres.includes(selectedFilter) : true));
 
+    console.log("selectedfilter", selectedFilter)
+    console.log("movies", movies)
 
 
+    const genres = Array.from(new Set(movies.flatMap((movie) => movie.genres)));
     const totalPages = Math.ceil(filteredImages.length / itemsPerPage);
     const paginatedImages = filteredImages.slice(
         (currentPage - 1) * itemsPerPage,
@@ -78,7 +67,7 @@ const HomePage: React.FC = () => {
                 toggleFavorite={(img) => toggleFavorite(dispatch, favorites, img)}
             />
             <div className="flex justify-center mt-6 gap-2">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+                {Array.from({length: totalPages}, (_, i) => i + 1).map((num) => (
                     <button
                         key={num}
                         onClick={() => dispatch(setCurrentPage(num))}
