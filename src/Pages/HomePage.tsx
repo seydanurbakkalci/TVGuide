@@ -23,12 +23,16 @@ const HomePage: React.FC = () => {
         }
     }, []);
 
+    useEffect(() => {
+        dispatch(setCurrentPage(1));
+    },[selectedFilter]);
+
     const filteredImages = movies
         .filter((movie) => (selectedFilter ? movie.genres.includes(selectedFilter) : true));
 
     console.log("selectedfilter", selectedFilter)
     console.log("movies", movies)
-
+    console.log("currentpage",currentPage)
 
     const genres = Array.from(new Set(movies.flatMap((movie) => movie.genres)));
     const totalPages = Math.ceil(filteredImages.length / itemsPerPage);

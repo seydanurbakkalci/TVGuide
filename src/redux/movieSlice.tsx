@@ -91,6 +91,9 @@ export const movieSlice = createSlice({
         setShowDetail: (state, action) => {
             state.showDetail = action.payload;
         },
+        setLoading:(state,action)=>{
+            state.loading=action.payload;
+        },
     },
 });
 
@@ -104,28 +107,46 @@ export const {
     setDropdown,
     closeSearchDropdown,
     setShowDetail,
+    setLoading
 } = movieSlice.actions;
+
+
+interface showResult {
+    show: {
+        id: number;
+        name: string;
+        image: {
+            medium: string;
+            original: string;
+        } | null;
+    };
+}
 
 export const fetchSearchResults = (query:string) => {
     return async (dispatch: AppDispatch) => {
+        dispatch(setLoading(true));
+
         if (query.trim() === "") {
             dispatch(setSearchResults([]));
+            dispatch(setLoading(false));
             return;
         }
-
         try {
             const response = await fetch(`https://api.tvmaze.com/search/shows?q=${query}`);
 
             const data = await response.json();
-            const results = data.map((item: Image) => ({
-                name: item.name,
-                image: item.image?.original ?? '/placeholder.jpg',
+            const results =( data as showResult[]).map((item) => ({
+                id:item.show.id,
+                name: item.show.name,
+                image: item.show.image ?? { medium: '/placeholder.jpg', original: '/placeholder.jpg' },
 
             }));
-            dispatch(setSearchResults(results.slice(0, 10)));
+            dispatch(setSearchResults(results));
         } catch (error) {
             console.error("apı error", error);
             dispatch(setSearchResults([]));
+        }finally {
+            dispatch(setLoading(false));
         }
     };
 };
@@ -161,6 +182,8 @@ export const getShowDetail = (id: number) => {
 
 export const fetchImages = () => {
     return async (dispatch: AppDispatch) => {
+        dispatch(setLoading(true));
+
         try {
             const response = await fetch('https://api.tvmaze.com/shows');
             const data = await response.json();
@@ -185,6 +208,8 @@ export const fetchImages = () => {
             ));
         } catch (error) {
             console.error('Failed to fetch images:', error);
+        }finally {
+            dispatch(setLoading(false));
         }
     };
 };

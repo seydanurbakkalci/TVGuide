@@ -37,7 +37,7 @@ const ShowsDetail: React.FC = () => {
 
                     <div className="w-full lg:w-1/2">
                         <img
-                            src={showDetail.image.medium}
+                            src={showDetail.image}
                             alt={showDetail.name}
                             className="w-full h-64 sm:h-96 lg:h-full object-cover"
                         />

@@ -44,6 +44,7 @@ const Search: React.FC = () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [dispatch, searchDropdown]);
+    console.log("searchress",searchResults)
 
     return (
         <div ref={searchRef} className="relative w-full lg:w-80 search-container">
@@ -56,7 +57,7 @@ const Search: React.FC = () => {
             />
 
             {searchDropdown && searchResults.length > 0 && (
-                <div  className="absolute top-full mt-2 bg-white text-black rounded-lg shadow-lg w-full lg:w-96 z-50">
+                <div  className="absolute top-full mt-2 bg-white text-black rounded-lg shadow-lg w-full lg:w-96 z-50 max-h-80 overflow-y-auto">
                     {searchResults.map((movie) => (
                         <div
                             key={movie.id}

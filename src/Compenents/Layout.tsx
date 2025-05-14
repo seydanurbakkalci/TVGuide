@@ -20,7 +20,6 @@ const Layout: React.FC = () => {
         }
     }, [dispatch, images]);
 
-
     return (
         <div className="relative ">
             <video
